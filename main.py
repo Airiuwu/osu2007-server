@@ -6,8 +6,8 @@ from jinja2 import PackageLoader
 from hashlib import sha256, md5
 from cmyui import AsyncSQLPool
 from objects import glob
-import config, re
-import base64
+from re import split
+import config
 
 app = Application()
 returnTemplate = use_templates(app, loader=PackageLoader("app", "templates"), enable_async=True)
@@ -78,7 +78,7 @@ async def retrieveScores(request):
 async def submitScore(request):
 	perfect, passedScore, outdated = "0", "0", "0"
 	score, password = request.query.get("score"), request.query.get("pass")
-	scoreData = re.split('[-:]', score[0])
+	scoreData = split('[-:]', score[0])
 	userData = await glob.db.fetch("SELECT * FROM users WHERE username = %s AND password = %s", [scoreData[1], password[0]])
 	bannedMapCheck = await glob.db.fetch("SELECT * FROM `banned_maps` WHERE `mapHash` = %s", [scoreData[0]])
 	if scoreData[11] == "True": perfect = 1
