@@ -105,10 +105,11 @@ async def submitScore(request):
 @app.route("/web/osu-getreplay.php", methods=['GET', 'POST'])
 async def getReplay(request):
 	replayID = request.query.get("c")
-	# with open(f"data/replays/replay_{replayID[0]}.osr", "rb") as replay:
-	# 	replayData = replay.read()
-	# 	replay.close()
-	# return(replayData)
+	return file(
+		"data/replays/replay_{replayID[0]}.osr",
+		"text/osr",
+		content_disposition=ContentDispositionType.INLINE
+	)
 
 app.on_start += before_start
 consoleHelper.printHeader()
