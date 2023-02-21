@@ -1,6 +1,6 @@
 from blacksheep.server.templating import use_templates
+from blacksheep.server import Application, file
 from blacksheep.server.responses import text
-from blacksheep.server import Application
 from helpers import consoleHelper
 from jinja2 import PackageLoader
 from hashlib import sha256, md5
