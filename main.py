@@ -1,5 +1,5 @@
+from blacksheep import Application, file, ContentDispositionType
 from blacksheep.server.templating import use_templates
-from blacksheep.server import Application, file
 from blacksheep.server.responses import text
 from helpers import consoleHelper
 from jinja2 import PackageLoader
@@ -24,7 +24,7 @@ async def home(request):
 async def register(request):
 	if request.method == "POST":
 		data = await request.form()
-		username, password, email = data["username"], md5(data["password"].encode('utf-8')).hexdigest(), data["email"]
+		username, password, email = data["username"], sha256(data["password"].encode('utf-8')).hexdigest(), data["email"]
 
 		checkUsername = await glob.db.fetch("SELECT * FROM users WHERE username = %s", [username])
 		checkEmail = await glob.db.fetch("SELECT * FROM users WHERE email = %s", [email])
@@ -85,8 +85,6 @@ async def submitScore(request):
 	if userData is not None or userData["banned"] == "0" or bannedMapCheck is None:
 		highScore = await glob.db.fetch("SELECT * FROM scores WHERE mapHash = %s AND playerId = %s AND outdated = 0 AND pass = 1 ORDER BY score DESC", [scoreData[0], userData["id"]])
 		if highScore is not None:
-			print(highScore)
-			print(f"{scoreData[9]} | {highScore['score']}")
 			if int(scoreData[9]) > int(highScore["score"]):
 				if passedScore != "0":
 					outdated = "1"
@@ -98,15 +96,15 @@ async def submitScore(request):
 			lastScore = await glob.db.fetch("SELECT * FROM scores WHERE playerId = %s AND mapHash = %s AND pass = 1 ORDER BY id DESC", [userData["id"], scoreData[0]])
 			if lastScore is not None:
 				data = await request.read()
-				print(data)
-				with open(f"app/static/replays/replay_{lastScore['id']}.osr", "wb") as replay:
+				with open(f"data/replays/replay_{lastScore['id']}.osr", "wb") as replay:
 					replay.write(data)
 
 @app.route("/web/osu-getreplay.php", methods=['GET', 'POST'])
 async def getReplay(request):
 	replayID = request.query.get("c")
+	consoleHelper.logInfo(msg=f"Serving replay => {replayID[0]}")
 	return file(
-		"data/replays/replay_{replayID[0]}.osr",
+		f"data/replays/replay_{replayID[0]}.osr",
 		"text/osr",
 		content_disposition=ContentDispositionType.INLINE
 	)
